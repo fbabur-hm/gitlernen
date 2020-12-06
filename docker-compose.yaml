@@ -1,0 +1,21 @@
+version: "3"
+services:
+  jenkins-master:
+    build:
+      context: ./docker/images/jenkins-master
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./docker/volumes/jenkins-home:/var/jenkins_home:cached
+    ports:
+      - 8080:8080
+      - 50000:50000
+    environment:
+      - TRY_UPGRADE_IF_NO_MARKER=true
+      - JAVA_OPTS= -Dhudson.remoting.ClassFilter=com.google.common.collect.ImmutableListMultimap -DexecutableWar.jetty.disableCustomSessionIdCookieName=true -DexecutableWar.jetty.sessionIdCookieName=codingstyle
+    user: ${CURRENT_UID}
+    restart: always
+  java-agent:
+    build: ./docker/images/java-agent
+    depends_on:
+      - jenkins-master
+    restart: always
